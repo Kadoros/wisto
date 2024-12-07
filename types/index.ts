@@ -1,4 +1,12 @@
-import { Member, MemberRole, Profile, Server } from "@prisma/client";
+import {
+  Channel,
+  ChannelType,
+  Member,
+  MemberRole,
+  Profile,
+  Server,
+} from "@prisma/client";
+import React from "react";
 
 // Define the valid endpoint types
 export type EndpointType = "messageFile" | "serverImage";
@@ -45,10 +53,16 @@ export type ModalType =
   | "invite"
   | "editServer"
   | "members"
-  | "createChannel";
+  | "createChannel"
+  | "leaveServer"
+  | "deleteServer"
+  | "deleteChannel"
+  | "editChannel";
 
 export interface ModalData {
   server?: Server;
+  channel?: Channel;
+  channelType?: ChannelType;
 }
 
 export interface ModalStore {
@@ -68,4 +82,55 @@ export interface InviteCodePageProps {
 export interface UserAvatarProps {
   src?: string;
   className?: string;
+}
+
+export interface ServerSearchProps {
+  data: {
+    label: string;
+    type: "channel" | "member";
+    data:
+      | {
+          icon: React.ReactNode;
+          name: string;
+          id: string;
+        }[]
+      | undefined;
+  }[];
+}
+
+export interface ServerSectionProps {
+  label: string;
+  role?: MemberRole;
+  sectionType: "channels" | "members";
+  channelType?: ChannelType;
+  server?: ServerWithMembersWithProfiles;
+}
+export interface ServerChannelProps {
+  channel: Channel;
+  server: Server;
+  role?: MemberRole;
+}
+export interface ServerMemberProp {
+  member: Member & { profile: Profile };
+  server: Server;
+}
+
+export interface ServeIdPageProps {
+  params: {
+    serverId: string;
+  };
+}
+
+export interface ChannelIdPageProps {
+  params: {
+    serverId: string;
+    channelId: string;
+  };
+}
+
+export interface ChatHeaderProps {
+  serverId: string;
+  name: string;
+  type: "channel" | "conversation";
+  imageUrl?: string;
 }

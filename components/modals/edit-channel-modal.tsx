@@ -24,8 +24,7 @@ import {
 } from "@/components//ui/form";
 import { Input } from "@/components//ui/input";
 import { Button } from "@/components/ui/button";
-import { ImageUpload } from "@/components/global/image-upload";
-import { useParams, useRouter } from "next/navigation";
+
 import { useModal } from "@/hooks/use-modal-store";
 import { ChannelType } from "@prisma/client";
 import {
@@ -36,6 +35,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   name: z
@@ -49,42 +49,40 @@ const formSchema = z.object({
   type: z.nativeEnum(ChannelType),
 });
 
-export const CreateChannelModal = () => {
+export const EditChannelModal = () => {
   const { isOpen, onClose, type, data } = useModal();
   const router = useRouter();
-  const params = useParams();
 
-  const isModalOpen = isOpen && type == "createChannel";
+  const isModalOpen = isOpen && type == "editChannel";
 
-  const { channelType } = data;
+  const { channel, server } = data;
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      type: channelType || ChannelType.TEXT,
+      type: channel?.type || ChannelType.TEXT,
     },
   });
 
   useEffect(() => {
-    if (channelType) {
-      form.setValue("type", channelType);
-    } else {
-      form.setValue("type", ChannelType.TEXT);
+    if (channel) {
+      form.setValue("name", channel.name);
+      form.setValue("type", channel.type);
     }
-  }, [channelType, form]);
+  }, [form, channel]);
 
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const url = qs.stringifyUrl({
-        url: "/api/channel",
+        url: `/api/channel/${channel?.id}`,
         query: {
-          serverId: params?.serverId,
+          serverId: server?.id,
         },
       });
-      await axios.post(url, values);
+      await axios.patch(url, values);
       form.reset();
       router.refresh();
       onClose();
